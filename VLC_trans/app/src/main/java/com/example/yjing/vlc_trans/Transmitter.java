@@ -1,0 +1,221 @@
+package com.example.yjing.vlc_trans;
+
+import android.app.Activity;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.Display;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+/**
+ * Created by yjing on 2017/11/9.
+ */
+
+public class Transmitter extends Activity{
+
+    Activity activity;
+    static String filePath;
+    String encode_info;
+
+    Point size;
+    int grid_size_x;
+    int grid_size_y;
+    Bitmap icon_white;
+    Bitmap bmFrame;
+    ImageView background_image;
+
+    ImageView[][] commViews;
+
+    Timer timer;
+    TimerTask timerTask;
+    final Handler handler = new Handler();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        activity = this;
+
+        Bundle extras = getIntent().getExtras();
+
+        //extract intent message from Main Activity
+        if (extras != null) {
+            filePath = extras.getString("filepath");
+            encode_info = extras.getString("encode_info");
+        }
+
+        if (encode_info.equals("")) {
+            encode_info = "110120110120";
+        }
+
+        setContentView(R.layout.media_metadata);
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.mainLayout);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        grid_size_x = width / 6;
+        grid_size_y = height / 6;
+
+        commViews = new ImageView[6][6];
+
+        //Get black background for the foreground imageview
+        Bitmap icon = decodeSampledBitmapFromResource(this.getResources(), R.drawable.single_color_img, grid_size_x, grid_size_y);
+        icon = Bitmap.createScaledBitmap(icon, grid_size_x, grid_size_y, true);
+        icon_white = decodeSampledBitmapFromResource(this.getResources(), R.drawable.single_color_img_white, grid_size_x, grid_size_y);
+        icon_white = Bitmap.createScaledBitmap(icon_white, grid_size_x, grid_size_y, true);
+
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        bmFrame = BitmapFactory.decodeFile(filePath);
+        background_image = new ImageView(this);
+        background_image.setImageBitmap(bmFrame);
+        background_image.setLayoutParams(params);
+        layout.addView(background_image);
+
+        //add communication layer
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
+                commViews[i][j] = new ImageView(this);
+                commViews[i][j].setId(1 + i * 6 + j);
+                commViews[i][j].setImageAlpha(0);
+                params = new RelativeLayout.LayoutParams(width / 6, height / 6);
+                if(j == 0) {
+                    if(i == 0) {
+                        //动态布局
+                        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                        params.addRule((RelativeLayout.ALIGN_PARENT_TOP));
+                        commViews[i][j].setLayoutParams(params);
+                    } else {
+                        params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                        params.addRule(RelativeLayout.RIGHT_OF, commViews[i - 1][j].getId());
+                        commViews[i][j].setLayoutParams(params);
+                    }
+                } else {
+                    params.addRule(RelativeLayout.BELOW, commViews[i][j - 1].getId());
+                    if(i == 0) {
+                        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                    } else {
+                        params.addRule(RelativeLayout.RIGHT_OF, commViews[i - 1][j].getId());
+                    }
+                    commViews[i][j].setLayoutParams(params);
+                }
+
+                commViews[i][j].setImageBitmap(icon);
+                commViews[i][j].bringToFront();
+                layout.addView(commViews[i][j]);
+            }
+        }
+
+
+        //test
+//        for (int i = 0; i < 6; i++) {
+//            for (int j = 0; j < 6; j++) {
+//                commViews[i][j].setImageAlpha(100);
+//            }
+//        }
+
+    }
+
+
+    public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
+                                                         int reqWidth, int reqHeight) {
+
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeResource(res, resId, options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeResource(res, resId, options);
+    }
+
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            // Calculate ratios of height and width to requested height and width
+            final int heightRatio = Math.round((float) height / (float) reqHeight);
+            final int widthRatio = Math.round((float) width / (float) reqWidth);
+
+            // Choose the smallest ratio as inSampleSize value, this will guarantee
+            // a final image with both dimensions larger than or equal to the
+            // requested height and width.
+            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+        }
+
+        return inSampleSize;
+    }
+
+    protected void onResume() {
+        super.onResume();
+
+        //onResume we start our timer so it can start when the app comes from the background
+        startTimer();
+    }
+
+    public void startTimer() {
+        //set a new Timer
+        timer = new Timer();
+
+        //initialize the TimerTask's job
+        initializeTimerTask();
+
+        //schedule the timer, after the first 1000ms the TimerTask will run every 16ms
+        timer.schedule(timerTask, 500, 16); //
+    }
+
+    public void initializeTimerTask() {
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i = 0; i < 6; i++) {
+                            for (int j = 0; j < 6; j++) {
+                                commViews[i][j].setImageAlpha(2*i*10);
+                            }
+                        }
+                    }
+                });
+            }
+        };
+    }
+    public void stoptimertask(View v) {
+        //stop the timer, if it's not already null
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+    }
+
+    //响应后退键
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        handler.removeCallbacksAndMessages(null);
+    }
+}

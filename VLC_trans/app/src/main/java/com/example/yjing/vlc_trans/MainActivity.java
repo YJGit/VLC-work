@@ -17,6 +17,7 @@ import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -70,6 +71,21 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, REQUEST_CODE_SELECT_FROM_GALLERY);
     }
 
+    public void startTransmission(View v) {
+        String toBeEncoded = "110120110120";
+        if (filePath == null){
+            Toast.makeText(getApplicationContext(), "Please choose image/video.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        //send intent message to image/video class
+        Intent intent = new Intent(this, Transmitter.class);
+        Bundle b = new Bundle();
+        b.putString("filepath", filePath); //input file path
+        b.putString("encode_info", toBeEncoded); //encode data
+        intent.putExtras(b);
+        startActivity(intent);
+    }
     // Handle date after activity returns.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

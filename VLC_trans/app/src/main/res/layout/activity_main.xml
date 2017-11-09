@@ -6,60 +6,82 @@
     android:layout_height="match_parent"
     tools:context="com.example.yjing.vlc_trans.MainActivity">
 
-    <android.support.v7.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:elevation="10dp"
-        card_view:cardCornerRadius="2dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="20dp"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="20dp">
+        <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:elevation="10dp"
+            card_view:cardCornerRadius="2dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:text="img:"></TextView>
-
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="35dp"
-                android:baselineAligned="false">
+                android:layout_height="match_parent"
+                android:paddingBottom="16dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="16dp"
+                android:paddingTop="20dp">
 
-                <ImageView
-                    android:id="@+id/transmissionImage"
-                    android:layout_width="0dp"
-                    android:layout_height="100dp"
-                    android:layout_margin="5dp"
-                    android:layout_weight="1"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true">
-
-                    <requestFocus />
-                </ImageView>
-
-                <Button
-                    android:id="@+id/btnChangePhoto"
-                    android:layout_width="100dp"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:elevation="5dp"
-                    android:enabled="true"
-                    android:onClick="onChangePhotoClicked"
-                    android:text="open"></Button>
-            </LinearLayout>
-        </FrameLayout>
-    </android.support.v7.widget.CardView>
+                    android:layout_margin="5dp"
+                    android:text="img:"></TextView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="35dp"
+                    android:baselineAligned="false">
+
+                    <ImageView
+                        android:id="@+id/transmissionImage"
+                        android:layout_width="0dp"
+                        android:layout_height="100dp"
+                        android:layout_margin="5dp"
+                        android:layout_weight="1"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true">
+
+                        <requestFocus />
+                    </ImageView>
+
+                    <Button
+                        android:id="@+id/btnChangePhoto"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_margin="10dp"
+                        android:elevation="5dp"
+                        android:enabled="true"
+                        android:onClick="onChangePhotoClicked"
+                        android:text="open"></Button>
+                </LinearLayout>
+            </FrameLayout>
+        </android.support.v7.widget.CardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp">
+
+            <Button
+                android:id="@+id/btnStart"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_weight="1"
+                android:elevation="5dp"
+                android:onClick="startTransmission"
+                android:text="start transmission"></Button>
+        </LinearLayout>
+
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>
