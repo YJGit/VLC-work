@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">VLC_trans</string>
+
+    <string name="input_file_name">profile_photo.png</string>
+</resources>
