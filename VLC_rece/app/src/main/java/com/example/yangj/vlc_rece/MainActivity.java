@@ -16,7 +16,6 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mTextView;
     android.hardware.Camera mCamera;
-    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,14 +34,8 @@ public class MainActivity extends AppCompatActivity {
 
         mTextView = (TextView)findViewById(R.id.textView);
         mCamera = CreateCamera();
-        //显示信息
-        mHandler = new Handler() {
-            public void handleMessage(android.os.Message msg) {
-                mTextView.setText((String) msg.obj);
-            };
-        };
 
-        CameraPreview cp = new CameraPreview(this, mCamera, mHandler);
+        CameraPreview cp = new CameraPreview(this, mCamera, mTextView);
         FrameLayout preview = (FrameLayout)findViewById(R.id.camera_preview);
         preview.addView(cp);
     }

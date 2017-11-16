@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startTransmission(View v) {
-        String toBeEncoded = "110120110120";
+        String toBeEncoded = "10110100";
         if (filePath == null){
             Toast.makeText(getApplicationContext(), "Please choose image/video.", Toast.LENGTH_LONG).show();
             return;
@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtras(b);
         startActivity(intent);
     }
+
     // Handle date after activity returns.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

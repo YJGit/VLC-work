@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.ImageView;
@@ -24,6 +25,8 @@ public class Transmitter extends Activity{
     Activity activity;
     static String filePath;
     String encode_info;
+    String final_encode;
+    int ind;
 
     Point size;
     int grid_size_x;
@@ -38,6 +41,11 @@ public class Transmitter extends Activity{
     TimerTask timerTask;
     final Handler handler = new Handler();
 
+    int grey;
+    private static String TAG = "Transmitter";
+
+    private static int timeInt = 1000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,9 +59,12 @@ public class Transmitter extends Activity{
             encode_info = extras.getString("encode_info");
         }
 
+        final_encode = "";
         if (encode_info.equals("")) {
-            encode_info = "110120110120";
+            encode_info = "10110100";
         }
+        ind = 0;
+        encode();
 
         setContentView(R.layout.media_metadata);
         RelativeLayout layout = (RelativeLayout) findViewById(R.id.mainLayout);
@@ -65,6 +76,7 @@ public class Transmitter extends Activity{
         int height = size.y;
         grid_size_x = width / 6;
         grid_size_y = height / 6;
+        grey = 0;
 
         commViews = new ImageView[6][6];
 
@@ -80,6 +92,7 @@ public class Transmitter extends Activity{
         background_image.setImageBitmap(bmFrame);
         background_image.setLayoutParams(params);
         layout.addView(background_image);
+
 
         //add communication layer
         for (int i = 0; i < 6; i++) {
@@ -115,14 +128,7 @@ public class Transmitter extends Activity{
             }
         }
 
-
-        //test
-//        for (int i = 0; i < 6; i++) {
-//            for (int j = 0; j < 6; j++) {
-//                commViews[i][j].setImageAlpha(100);
-//            }
-//        }
-
+        startTimer();
     }
 
 
@@ -168,7 +174,41 @@ public class Transmitter extends Activity{
         super.onResume();
 
         //onResume we start our timer so it can start when the app comes from the background
-        startTimer();
+    }
+
+    private void encode() {
+        final_encode += "11";
+        /*
+        String tmp = "";
+        //偶数倍 奇数添1
+        int len = encode_info.length();
+        if(len % 2 == 1) encode_info += "1";
+
+        for(int i = 0; i < encode_info.length(); i+=2) {
+            tmp = encode_info.substring(i, i + 2);
+            if(tmp.equals("00")) {
+                final_encode += "01";
+            }
+            else if(tmp.equals("01")) {
+                final_encode += "001";
+            }
+            else if(tmp.equals("11")) {
+                final_encode += "0001";
+            }
+            else {
+                final_encode += "00001";
+            }
+        }
+        */
+        for(int i = 0; i < encode_info.length(); i++) {
+            if(encode_info.charAt(i) == '1') {
+                final_encode += "01";
+            }
+            else {
+                final_encode += "001";
+            }
+        }
+        Log.d(TAG, "final_code: " + final_encode);
     }
 
     public void startTimer() {
@@ -179,7 +219,7 @@ public class Transmitter extends Activity{
         initializeTimerTask();
 
         //schedule the timer, after the first 1000ms the TimerTask will run every 16ms
-        timer.schedule(timerTask, 500, 16); //
+        timer.schedule(timerTask, 3000, timeInt);
     }
 
     public void initializeTimerTask() {
@@ -189,11 +229,17 @@ public class Transmitter extends Activity{
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
+                        if(ind >= final_encode.length()) return;
+                        if(final_encode.charAt(ind) == '1') grey = 1;
+                        else grey = 0;
+
                         for (int i = 0; i < 6; i++) {
                             for (int j = 0; j < 6; j++) {
-                                commViews[i][j].setImageAlpha(2*i*10);
+                                commViews[i][j].setImageAlpha(grey*100);
                             }
                         }
+
+                        ind++;
                     }
                 });
             }
