@@ -44,7 +44,10 @@ public class Transmitter extends Activity{
     int grey;
     private static String TAG = "Transmitter";
 
-    private static int timeInt = 1000;
+    private static int timeInt = 500;
+
+    double[][] gauss2d_matrix;
+    double[][] alpha_level_image;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +82,15 @@ public class Transmitter extends Activity{
         grey = 0;
 
         commViews = new ImageView[6][6];
+        gauss2d_matrix = new double[1][1];
+        alpha_level_image = new double[6][6];
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
+                alpha_level_image[i][j] = 1;
+            }
+        }
+        getGaussian2d();
+        getAlphaLevel();
 
         //Get black background for the foreground imageview
         Bitmap icon = decodeSampledBitmapFromResource(this.getResources(), R.drawable.single_color_img, grid_size_x, grid_size_y);
@@ -208,6 +220,8 @@ public class Transmitter extends Activity{
                 final_encode += "001";
             }
         }
+
+        //final_encode += "00";
         Log.d(TAG, "final_code: " + final_encode);
     }
 
@@ -219,7 +233,7 @@ public class Transmitter extends Activity{
         initializeTimerTask();
 
         //schedule the timer, after the first 1000ms the TimerTask will run every 16ms
-        timer.schedule(timerTask, 3000, timeInt);
+        timer.schedule(timerTask, 2000, timeInt);
     }
 
     public void initializeTimerTask() {
@@ -235,7 +249,10 @@ public class Transmitter extends Activity{
 
                         for (int i = 0; i < 6; i++) {
                             for (int j = 0; j < 6; j++) {
-                                commViews[i][j].setImageAlpha(grey*100);
+                                if(i == 0 || i == 5)
+                                    commViews[i][j].setImageAlpha((int)(grey*20*alpha_level_image[i][j]));
+                                else
+                                    commViews[i][j].setImageAlpha(grey*10);
                             }
                         }
 
@@ -245,6 +262,34 @@ public class Transmitter extends Activity{
             }
         };
     }
+
+    //Gaussian filter
+    public void getGaussian2d() {
+        int centre_x = (int) Math.ceil(1.0 / 2);
+        int centre_y = (int) Math.ceil(1.0 / 2);
+        int normalized_index = 3;
+        double exponent;
+        int i, j;
+        for (i = 0; i < 1; i++) {
+            for (j = 0; j < 1; j++) {
+                exponent = (Math.pow((i + 1 - centre_x) * 1.0 / 1 * normalized_index, 2.0) + Math.pow((j + 1 - centre_y) * 1.0 / 1 * normalized_index, 2.0)) / 2;
+                gauss2d_matrix[i][j] = Math.exp(-exponent);
+            }
+        }
+    }
+
+    public void getAlphaLevel(){
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
+                for (int i1 = 0; i1 < 1; i1++) {
+                    for (int j1 = 0; j1 < 1; j1++) {
+                        alpha_level_image[i + i1][j + j1] = gauss2d_matrix[i1][j1];
+                    }
+                }
+            }
+        }
+    }
+
     public void stoptimertask(View v) {
         //stop the timer, if it's not already null
         if (timer != null) {

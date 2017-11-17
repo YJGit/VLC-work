@@ -8,6 +8,7 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -15,8 +16,14 @@ import android.view.SurfaceView;
 import android.view.TextureView;
 import android.widget.TextView;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by yangJ on 2017/11/11.
@@ -39,9 +46,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     //停止解码  连续endNum个0
     boolean stop = false;
-    //int conti_zero = 0;
+    int conti_zero = 0;
     int conti_one = 0;
-    int endNum = 8;
+    int endNum = 6;
+
+    int difbeT1an0 = 6;
 
     public CameraPreview(Context context, Camera camera, TextView textView) {
         super(context);
@@ -168,7 +177,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             Bitmap bmp = BitmapFactory.decodeByteArray(tmp, 0, tmp.length);
 
             try {
-                Double sRgb = getSumRGB(bmp, w, h);
+                //Bitmap copyBm = bmp.copy(Bitmap.Config.ARGB_8888, true);
+                Double sRgb = getSumRGB(bmp, w, h);//, copyBm);
+                //bmp = copyBm;
+                //saveMyBitmap("1", bmp);
                 bmpPool[end] = sRgb;
 
                 int end_after = (end + 1) % num;
@@ -180,7 +192,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 if(end == begin) begin = (begin + 1) % num;
 
                 //是否结束
-                if(/*conti_zero >= endNum || */conti_one >= endNum)
+                if(conti_one >= endNum || conti_zero >= endNum)
                     stop = true;
 
                 return data;
@@ -193,61 +205,62 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         //解码数据
         private void decode(){
-            if(bmpPool[end] > bmpPool[begin] * 1.05) {
+            if(bmpPool[end] > bmpPool[begin] + 6) {
                 data += "0";
                 lastBit = "1";
-                //conti_zero++;
+                conti_zero++;
                 conti_one = 0;
             }
-            else if(bmpPool[end] < bmpPool[begin] * 0.95) {
+            else if(bmpPool[end] < bmpPool[begin]  - 6) {
                 data += "1";
                 lastBit = "0";
-                //conti_zero = 0;
+                conti_zero = 0;
                 conti_one++;
             }
             else {
                 data += lastBit;
                 if(lastBit.equals("0")) {
-                    //conti_zero++;
+                    conti_zero++;
                     conti_one = 0;
                 }
                 else {
-                    //conti_zero = 0;
+                    conti_zero = 0;
                     conti_one++;
                 }
             }
         }
 
         //获取像素和
-        private Double getSumRGB(Bitmap bmp, int w, int h) {
-
+        private Double getSumRGB(Bitmap bmp, int w, int h/*, Bitmap cop*/) {
         //sum rgb
         int []pixels = new int[w * h];
         bmp.getPixels(pixels, 0, w, 0, 0, w, h); //640 480
         double res = 0.0f;
-
+        int w15 = w / 5, w45 = w15 * 4;
         for(int i = 0; i < h; i++) {
-            for(int j = 0; j < w; j++) {
+            for(int j = w15; j < w45; j++) {
                 int grey = pixels[w * i + j];
+                //if(j < w /2 ) pixels[w * i + j] = 0x00ff0000;
 
                 int red = ((grey  & 0x00FF0000 ) >> 16);
                 int green = ((grey & 0x0000FF00) >> 8);
                 int blue = (grey & 0x000000FF);
 
                 //grey = (int)((float) red * 0.3 + (float)green * 0.59 + (float)blue * 0.11);
-                //grey = alpha | (grey << 16) | (grey << 8) | grey;
-                //double t = (double) red * 0.3 + (double)green * 0.59 + (double)blue * 0.11;
+                //res += grey;
                 double t = red + green + blue;
-                if(t < 205 * 3) t = (t / (3 * 255)) * 2.1;   //亮的地方加权重
+                if(t < 205 * 3) t = (t / (3 * 255)) * 5.1;   //亮的地方加权重
                 else t = (t / (3 * 255)) * 0.1;
                 res += t;
             }
         }
+
         res = res / (w*h);
         res *= 1000;    //放大差距
         String output = Double.toString(res);
         Log.d(TAG, output);
 
+        //cop.setPixels(pixels, 0, w, 0, 0, w, h);
         return res;
     }
 }
@@ -259,7 +272,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 try {
                     if(mCamera != null) {
                         mCamera.setOneShotPreviewCallback(new MyCamera());
-                        Thread.sleep(1000);
+                        Thread.sleep(500);
                     }
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
@@ -267,6 +280,39 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                     Thread.currentThread().interrupt();
                 }
             }
+        }
+    }
+
+    public void saveMyBitmap(String bitName, Bitmap mBitmap){
+        File sdRoot = Environment.getExternalStorageDirectory();
+        String dir = "/VLC/";
+        File mkDir = new File(sdRoot, dir);
+        if (!mkDir.exists())
+            mkDir.mkdirs();
+        File f = new File(sdRoot, dir + bitName + ".png");
+
+        try {
+            f.createNewFile();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        FileOutputStream fOut = null;
+        try {
+            fOut = new FileOutputStream(f);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        mBitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+        try {
+            fOut.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
