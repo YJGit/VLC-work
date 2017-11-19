@@ -14,8 +14,10 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -25,12 +27,14 @@ import java.nio.ByteBuffer;
 
 public class MainActivity extends AppCompatActivity {
 
+    private String TAG = "mainActivity";
     public static final int REQUEST_CODE_SELECT_FROM_GALLERY = 1;
     private static final String IMAGE_UNSPECIFIED = "image/*";
     private static final String URI_INSTANCE_STATE_KEY = "saved_uri";
 
     private ImageView mImageView;
     private Button mBtChange;
+    private EditText meditText;
     private Uri mImageCaptureUri;
     private String filePath;
 
@@ -42,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         //关联到ui
         mImageView = (ImageView) findViewById(R.id.transmissionImage);
         mBtChange = (Button) findViewById(R.id.btnChangePhoto);
+        meditText = (EditText)findViewById(R.id.editTextEncodingInformation);
 
         if (savedInstanceState != null) {
             mImageCaptureUri = savedInstanceState.getParcelable(URI_INSTANCE_STATE_KEY);
@@ -72,7 +77,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startTransmission(View v) {
-        String toBeEncoded = "10110100";
+        String toBeEncoded = meditText.getText().toString();
+        Log.i(TAG, "startTransmission: " + toBeEncoded);
         if (filePath == null){
             Toast.makeText(getApplicationContext(), "Please choose image/video.", Toast.LENGTH_LONG).show();
             return;

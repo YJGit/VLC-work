@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <Button
+        android:id="@+id/startAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_bg"
+        android:text="开始录音"
+        android:textColor="@android:color/white"/>
+
+    <Button
+        android:id="@+id/stopAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/button_bg"
+        android:text="停止录音"
+        android:textColor="@android:color/white"/>
+
+    <Button
+        android:id="@+id/playAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_bg"
+        android:text="播放音频"
+        android:textColor="@android:color/white"/>
+
+    <Button
+        android:id="@+id/deleteAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/button_bg"
+        android:text="删除PCM"
+        android:textColor="@android:color/white"/>
+
+    <Button
+        android:id="@+id/transAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/button_bg"
+        android:text="转换PCM到WAV"
+        android:textColor="@android:color/white"/>
+
+    <ScrollView
+        android:id="@+id/mScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:layout_weight="1">
+
+        <TextView
+            android:id="@+id/tv_audio_succeess"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorAccent"/>
+
+    </ScrollView>
+
+
+</LinearLayout>
