@@ -236,9 +236,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         int []pixels = new int[w * h];
         bmp.getPixels(pixels, 0, w, 0, 0, w, h); //640 480
         double res = 0.0f;
-        int w15 = w / 5, w45 = w15 * 4;
+        int w15 = w / 5;//, w45 = w15 * 4;
         for(int i = 0; i < h; i++) {
-            for(int j = w15; j < w45; j++) {
+            for(int j = w15; j < w; j++) {
                 int grey = pixels[w * i + j];
                 //if(j < w /2 ) pixels[w * i + j] = 0x00ff0000;
 
